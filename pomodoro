@@ -1,0 +1,55 @@
+#!/bin/bash
+## pomodoro script by Ander Raso Vázquez anderraso@gmail.com
+
+############## DOCUMENTATION ###################
+## After a pomodoro of 25 min -> 5 min break
+## After 4 pomodoros done -> 15 min break
+##
+## USAGE
+## [command] [number of pomodoros] 
+## example:
+## $ ./pomodoro.sh 5
+################################################
+
+progress () {
+        BAR='#########################'   
+        for i in {1..25}; do
+            echo -ne "\r${BAR:0:$i}";right=$((30-$i));printf "%${right}s" \($i\)
+            sleep 60
+        done
+        echo -ne '\n'
+}
+
+echo "#### Pomodoro Counter ####"
+
+if [[ -n "$1" ]]; then
+    pomodoros_need=$1
+else
+    pomodoros_need=1 # default to 1  #read -p "How much pomodoros do you need? " pomodoros_need
+fi
+
+# 4 cicles of pomodoros = long break
+pomodoro_cicle=0
+for (( c=1; c<=$pomodoros_need; c++ )) # c = pomodoro count
+do
+    pomodoro_cicle=$(($pomodoro_cicle+1))
+    echo "Time for Pomodoro #$c, work!"
+    notify-send "Pomodoro Counter" "Time for Pomodoro #$c, work!"
+    progress # sleep 1500 # 25 min work
+    if [[ "$pomodoro_cicle" = 4 ]]; then
+        echo "#$c pomodoro done, it's long break time!"
+        notify-send "Pomodoro Counter" "#$c pomodoro done, it's long break time!"
+        pomodoro_cicle=0
+        sleep 900 # long break of 15 min
+    else
+        echo "#$c pomodoro done, it's break time!"
+        notify-send "Pomodoro Counter" "#$c pomodoro done, it's break time!"
+        sleep 300 # short break of 5 min 
+    fi
+    echo "Break finished, get back to work!"
+    notify-send "Pomodoro Counter" "Break finished, get back to work!"
+done
+echo "No more pomodoros left, did you finish the task?"
+notify-send "Pomodoro Counter" "No more pomodoros left, did you finish the task?"
+
+exit 0
